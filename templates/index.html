@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Meal Budget Predictor</title>
+  <style>
+    body {
+      font-family: Arial;
+      background-color: #f0f2f5;
+      text-align: center;
+      margin-top: 50px;
+    }
+    form {
+      background: white;
+      display: inline-block;
+      padding: 30px 50px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    input, select {
+      margin: 10px;
+      padding: 10px;
+      width: 230px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 25px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    h2 {
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>🍽️ Student Meal Budget Predictor</h1>
+  <form action="/predict" method="POST">
+    <label>Dietary Preference:</label><br>
+    <select name="diet">
+      <option value="Veg">Veg</option>
+      <option value="Non-Veg">Non-Veg</option>
+    </select><br>
+
+    <label>Eating Out Per Week:</label><br>
+    <input type="number" name="eating_out" required><br>
+
+    <label>Age Group:</label><br>
+    <select name="age">
+      <option value="Under 18">Under 18</option>
+      <option value="18-25">18-25</option>
+      <option value="25+">25+</option>
+    </select><br>
+
+    <label>Fashion Spend per Month (₹):</label><br>
+    <input type="number" name="fashion_spend" required><br>
+
+    <button type="submit">Predict</button>
+  </form>
+
+  {% if prediction_text %}
+    <h2 style="margin-top: 30px;">{{ prediction_text }}</h2>
+  {% endif %}
+</body>
+</html>
