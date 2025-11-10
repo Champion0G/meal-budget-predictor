@@ -1,73 +1,251 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Meal Budget Predictor</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meal Budget Predictor | SNU ML Project</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial;
-      background-color: #f0f2f5;
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #74ebd5, #acb6e5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    /* --- Background floating particles --- */
+    .bubble {
+      position: absolute;
+      bottom: -10px;
+      background: rgba(255, 255, 255, 0.25);
+      border-radius: 50%;
+      animation: rise 10s infinite ease-in;
+    }
+
+    @keyframes rise {
+      0% { transform: translateY(0) scale(0.8); opacity: 0.8; }
+      100% { transform: translateY(-120vh) scale(1.2); opacity: 0; }
+    }
+
+    /* --- Container --- */
+    .container {
+      position: relative;
+      z-index: 2;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
       text-align: center;
-      margin-top: 50px;
+      width: 400px;
+      animation: fadeIn 0.7s ease-in-out;
+      transition: 0.3s ease;
     }
-    form {
-      background: white;
-      display: inline-block;
-      padding: 30px 50px;
-      border-radius: 12px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+
+    .container:hover {
+      transform: scale(1.02);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
     }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      color: #333;
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+    }
+
+    p.subtitle {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      text-align: left;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #444;
+    }
+
     input, select {
-      margin: 10px;
+      width: 100%;
       padding: 10px;
-      width: 230px;
-      border-radius: 6px;
+      border-radius: 8px;
       border: 1px solid #ccc;
+      margin-bottom: 18px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.3s;
     }
+
+    input:focus, select:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 10px rgba(0, 123, 255, 0.2);
+    }
+
     button {
-      margin-top: 15px;
-      padding: 10px 25px;
-      background-color: #007bff;
+      background: linear-gradient(90deg, #007bff, #6f00ff);
       color: white;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    button:hover {
+      background: linear-gradient(90deg, #0056b3, #4b00c7);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 91, 187, 0.3);
+    }
+
+    .result {
+      margin-top: 25px;
+      padding: 15px;
+      background: #f5f8ff;
+      border-radius: 8px;
+      font-weight: bold;
+      color: #333;
+      border-left: 5px solid #007bff;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    footer {
+      margin-top: 25px;
+      font-size: 0.8rem;
+      color: #777;
+    }
+
+    /* --- About section --- */
+    .info {
+      margin-top: 25px;
+      background: #eef4ff;
+      border-left: 4px solid #007bff;
+      border-radius: 8px;
+      padding: 10px 15px;
+      text-align: left;
+      font-size: 0.9rem;
+      color: #333;
+      transition: all 0.3s ease;
       cursor: pointer;
     }
-    button:hover {
-      background-color: #0056b3;
+
+    .info:hover {
+      background: #e0ecff;
     }
-    h2 {
-      color: #333;
+
+    .info p {
+      display: none;
+      margin-top: 10px;
+      color: #555;
+    }
+
+    /* --- Aesthetic cursor --- */
+    .cursor {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      background: radial-gradient(circle, #007bff 0%, transparent 70%);
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+      mix-blend-mode: screen;
     }
   </style>
 </head>
 <body>
-  <h1>🍽️ Student Meal Budget Predictor</h1>
-  <form action="/predict" method="POST">
-    <label>Dietary Preference:</label><br>
-    <select name="diet">
-      <option value="Veg">Veg</option>
-      <option value="Non-Veg">Non-Veg</option>
-    </select><br>
 
-    <label>Eating Out Per Week:</label><br>
-    <input type="number" name="eating_out" required><br>
+  <!-- floating aesthetic cursor -->
+  <div class="cursor" id="cursor"></div>
 
-    <label>Age Group:</label><br>
-    <select name="age">
-      <option value="Under 18">Under 18</option>
-      <option value="18-25">18-25</option>
-      <option value="25+">25+</option>
-    </select><br>
+  <!-- floating background bubbles -->
+  <div class="bubble" style="left:5%;width:25px;height:25px;animation-delay:0s;"></div>
+  <div class="bubble" style="left:15%;width:35px;height:35px;animation-delay:2s;"></div>
+  <div class="bubble" style="left:45%;width:30px;height:30px;animation-delay:4s;"></div>
+  <div class="bubble" style="left:70%;width:20px;height:20px;animation-delay:1s;"></div>
+  <div class="bubble" style="left:90%;width:40px;height:40px;animation-delay:3s;"></div>
 
-    <label>Fashion Spend per Month (₹):</label><br>
-    <input type="number" name="fashion_spend" required><br>
+  <div class="container">
+    <h1>🍽️ Meal Budget Predictor</h1>
+    <p class="subtitle">A Machine Learning Project by SNU Students</p>
 
-    <button type="submit">Predict</button>
-  </form>
+    <form action="/predict" method="POST">
+      <label>Dietary Preference:</label>
+      <select name="diet" required>
+        <option value="">Select</option>
+        <option value="Veg">Vegetarian</option>
+        <option value="Non-Veg">Non-Vegetarian</option>
+      </select>
 
-  {% if prediction_text %}
-    <h2 style="margin-top: 30px;">{{ prediction_text }}</h2>
-  {% endif %}
+      <label>Eating Out Per Week:</label>
+      <input type="number" name="eating_out" placeholder="e.g. 3" min="0" required />
+
+      <label>Age:</label>
+      <select name="age" required>
+        <option value="">Select</option>
+        <option value="Age-18">18</option>
+        <option value="Age-19">19</option>
+        <option value="Age-20">20</option>
+        <option value="Age-21">21</option>
+        <option value="Age-22">22</option>
+        <option value="Age-23">23</option>
+        <option value="Age-24">24</option>
+        <option value="Age-25">25+</option>
+      </select>
+
+      <label>Fashion Spend per Month (₹):</label>
+      <input type="number" name="fashion_spend" placeholder="e.g. 1200" min="0" required />
+
+      <button type="submit">Predict Budget</button>
+    </form>
+
+    {% if prediction_text %}
+      <div class="result">
+        {{ prediction_text }}
+      </div>
+    {% endif %}
+
+    <div class="info" onclick="toggleInfo()">
+      ℹ️ About this Project
+      <p id="info-text">
+        This web app uses a <b>Gradient Boosting Regression Model</b> trained on student lifestyle data (diet, fashion spend, age, eating frequency)
+        to estimate the expected meal budget per person. It demonstrates ML model deployment using Flask.
+      </p>
+    </div>
+
+    <footer>
+      © 2025 | Department of CSE, Sister Nivedita University
+    </footer>
+  </div>
+
+  <script>
+    // toggle info section
+    function toggleInfo() {
+      const text = document.getElementById('info-text');
+      text.style.display = text.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // floating cursor effect
+    const cursor = document.getElementById('cursor');
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.pageX + 'px';
+      cursor.style.top = e.pageY + 'px';
+    });
+  </script>
 </body>
 </html>
